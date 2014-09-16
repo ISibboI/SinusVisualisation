@@ -2,23 +2,28 @@ package de.isibboi.noise;
 
 import java.awt.*;
 import java.awt.image.*;
+import java.io.*;
 import java.math.*;
+import java.nio.*;
 import java.security.*;
 import java.util.*;
+import javax.imageio.*;
 import javax.swing.*;
 
 public class Noise {
-	private static final int IMAGE_WIDTH = 800;
-	private static final int IMAGE_HEIGHT = 600;
+	private static final int SCALE = 1;
+	private static final int IMAGE_WIDTH = 400 * SCALE;
+	private static final int IMAGE_HEIGHT = 400 * SCALE;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		Noise n = new Noise();
 	}
 	
 	private final SecureRandom sr;
 	private final long seed;
+	private final MessageDigest md5;
 	
-	public Noise() {
+	public Noise() throws Exception {
 		JFrame noiseFrame = new JFrame("Noise");
 		noiseFrame.getContentPane().setPreferredSize(new Dimension(IMAGE_WIDTH, IMAGE_HEIGHT));
 		noiseFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -28,6 +33,7 @@ public class Noise {
 		
 		sr = new SecureRandom();
 		seed = sr.nextLong();
+		md5 = MessageDigest.getInstance("MD5");
 		
 		BufferedImage noiseImage = new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB);
 		
@@ -37,40 +43,52 @@ public class Noise {
 			}
 		}
 		
+		try {
+			ImageIO.write(noiseImage, "png", new File("noise.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		noiseFrame.getContentPane().getGraphics().drawImage(noiseImage, 0, 0, null);
 		
 		System.out.println("Image shown. Finished.");
 	}
 	
-	public int noiseFunction(double x, double y) {
+	public int noiseFunction(double x, double y) throws Exception {
 		double dx = x - IMAGE_WIDTH / 2;
 		double dy = y - IMAGE_HEIGHT / 2;
 		double distance = Math.sqrt(dx * dx + dy * dy);
-		dx /= distance;
-		dy /= distance;
 		
-		final double trigonometricParameter = distance / 20;
-		x -= dx * Math.sin(trigonometricParameter) * 5;
-		y -= dy * Math.sin(trigonometricParameter) * 5;
+		final double trigonometricParameter = distance / 10 / SCALE;
+		x -= Math.sin(trigonometricParameter) * 2.5 * SCALE;
+		y -= Math.sin(trigonometricParameter) * 2.5 * SCALE;
 		
-		int blockX = (int) (x / 20);
-		int blockY = (int) (y / 20);
+		int blockX = (int) (x / 10 / SCALE);
+		int blockY = (int) (y / 10 / SCALE);
 	
-		Random r = new Random(seed ^ (blockX << 5) ^ (blockY << 13) ^ (blockX << 31) ^ (blockY << 43));
+		Color c = new Color(getRandomNumber(seed, blockX, blockY));
 		
-		for (int i = 0; i < 10; i++) {
-			r.nextLong();
-		}
+		double shade = Math.cos(trigonometricParameter);
+		shade = -Math.min(0, shade);
+		shade *= 0.35;
+		shade += 0.65;
 		
-		Color c = new Color((int) r.nextInt());
-		
-		/*double shade = -Math.cos(trigonometricParameter);
-		shade = Math.max(0, shade);
-		shade *= 0.5;
-		shade += 0.5;
-		
-		c = new Color((int) (c.getRed() * shade), (int) (c.getGreen() * shade), (int) (c.getBlue() * shade));*/
+		c = new Color((int) (c.getRed() * shade), (int) (c.getGreen() * shade), (int) (c.getBlue() * shade));
 		
 		return c.getRGB();
+	}
+	
+	public int getRandomNumber(long... parameters) throws Exception {
+		md5.reset();
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		DataOutputStream data = new DataOutputStream(bytes);
+		
+		for (long l: parameters) {
+			data.writeLong(l);
+		}
+		
+		byte[] digest = md5.digest(bytes.toByteArray());
+		
+		return digest[0] + (digest[1] << 8) + (digest[2] << 16) + (digest[2] << 24);
 	}
 }
