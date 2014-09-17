@@ -49,11 +49,11 @@ public class NoiseImage {
 //				new Vector(-1, -1, -Math.sqrt(2)),
 //				new Vector(-0.5, 2.5, -Math.sqrt(2)));
 		Vector cameraPosition = new Vector(1, 1, Math.sqrt(2))
-				.multiplyScalar(10);
+				.multiplyScalar(12);
 		c = new PerspectiveCamera(cameraPosition,
 				cameraPosition.multiplyScalar(-1),
 				new Vector(-0.5, 2.5, -Math.sqrt(2)),
-				cameraPosition.multiplyScalar(3.5));
+				cameraPosition.multiplyScalar(2.8));
 		
 		colorMap = new ColorMap(seed);
 		
@@ -107,6 +107,24 @@ public class NoiseImage {
 		int blockY = doubleToInt(hit.getY());
 	
 		Color c = new Color(colorMap.getColor(blockX, blockY));
+		int red = c.getRed();
+		int green = c.getGreen();
+		int blue = c.getBlue();
+		
+		// Some color modifications.
+		if (hit.getZ() > 0.3) {
+			double factor = Math.pow(0.25, hit.getZ() - 0.3);
+			red = (int) (red * factor);
+			green = 255 - (int) ((255 - green) * factor);
+		}
+		
+		if (hit.getZ() < 0.3) {
+			double factor = Math.pow(8, hit.getZ() - 0.3);
+			green = (int) (green * factor);
+			red = 255 - (int) ((255 - red) * factor);
+		}
+		
+		blue /= 6;
 		
 		// Calculate ascension.
 		double ascension = f.derivedValue(hit.getX(), hit.getY());
@@ -132,7 +150,7 @@ public class NoiseImage {
 		shade *= 1 - AMBIENT_LIGHT;
 		shade += AMBIENT_LIGHT;
 		
-		c = new Color((int) (c.getRed() * shade), (int) (c.getGreen() * shade), (int) (c.getBlue() * shade));
+		c = new Color((int) (red * shade), (int) (green * shade), (int) (blue * shade));
 		
 //		System.exit(0);
 		

@@ -3,10 +3,10 @@ package de.isibboi.noise;
 import de.isibboi.noise.function.Function;
 
 public class ParallelCamera implements Camera {
-	private static final double START_STEP = 10;
+	private static final double START_STEP = 5;
 	private static final double STEP_FACTOR = 2;
 	private static final int MAX_EXPONENTIAL_STEPS = 100;
-	private static final double MIN_SEARCH_INTERVAL = 0.01;
+	private static final double MIN_SEARCH_INTERVAL = 0.001;
 	
 	protected final Vector position;
 	protected final Vector orientation;
