@@ -45,9 +45,15 @@ public class NoiseImage {
 //		c = new ParallelCamera(new Vector(20, 20, 20),
 //				new Vector(-1, -1, -1),
 //				new Vector(-0.5, 1, -0.5));
-		c = new ParallelCamera(new Vector(20, 20, Math.sqrt(2) * 20),
-				new Vector(-1, -1, -Math.sqrt(2)),
-				new Vector(-0.5, 2.5, -Math.sqrt(2)));
+//		c = new ParallelCamera(new Vector(20, 20, Math.sqrt(2) * 20),
+//				new Vector(-1, -1, -Math.sqrt(2)),
+//				new Vector(-0.5, 2.5, -Math.sqrt(2)));
+		Vector cameraPosition = new Vector(1, 1, Math.sqrt(2))
+				.multiplyScalar(10);
+		c = new PerspectiveCamera(cameraPosition,
+				cameraPosition.multiplyScalar(-1),
+				new Vector(-0.5, 2.5, -Math.sqrt(2)),
+				cameraPosition.multiplyScalar(3.5));
 		
 		colorMap = new ColorMap(seed);
 		
@@ -92,6 +98,10 @@ public class NoiseImage {
 		
 //		System.out.println("(x, y): (" + x + ", " + y + "), hit: ("
 //				+ hit.getX() + ", " + hit.getY() + ")");
+		
+		if (!f.inRange(hit.getX(), hit.getY())) {
+			return 0;
+		}
 		
 		int blockX = doubleToInt(hit.getX());
 		int blockY = doubleToInt(hit.getY());

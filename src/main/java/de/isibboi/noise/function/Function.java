@@ -10,4 +10,8 @@ public abstract class Function {
 			  - value(x, y))
 			  / DERIVERATION_DISTANCE;
 	}
+	
+	public boolean inRange(double x, double y) {
+		return true;
+	}
 }
