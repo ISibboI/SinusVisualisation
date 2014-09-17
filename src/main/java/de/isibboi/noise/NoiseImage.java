@@ -25,9 +25,14 @@ public class NoiseImage {
 	private final MessageDigest md5;
 	private final Function f;
 	
+	private boolean ascensionOverflow = false;
+	private boolean shadeOverflow = false;
+	
 	public NoiseImage(Function f, int scale, int noiseScale) throws Exception {
+		BufferedImage noiseImage = new BufferedImage(IMAGE_WIDTH * scale, IMAGE_HEIGHT * scale, BufferedImage.TYPE_INT_RGB);
+		
 		JFrame noiseFrame = new JFrame("Noise");
-		noiseFrame.getContentPane().setPreferredSize(new Dimension(IMAGE_WIDTH, IMAGE_HEIGHT));
+		noiseFrame.getContentPane().setPreferredSize(new Dimension(noiseImage.getWidth(), noiseImage.getHeight()));
 		noiseFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		noiseFrame.pack();
 		noiseFrame.setResizable(false);
@@ -38,7 +43,7 @@ public class NoiseImage {
 		md5 = MessageDigest.getInstance("MD5");
 		this. f = f;
 		
-		BufferedImage noiseImage = new BufferedImage(IMAGE_WIDTH * scale, IMAGE_HEIGHT * scale, BufferedImage.TYPE_INT_RGB);
+		
 		
 		int realNoiseWidth = NOISE_WIDTH * noiseScale;
 		int realNoiseHeight = NOISE_HEIGHT * noiseScale;
@@ -65,8 +70,8 @@ public class NoiseImage {
 		double value = f.value(x, y);
 		
 		// Translate position to get an angled parallel projection effect.
-		x -= value * PROJECTION_DISPLACEMENT;
-		y -= value * PROJECTION_DISPLACEMENT;
+		x += value * PROJECTION_DISPLACEMENT;
+		y += value * PROJECTION_DISPLACEMENT;
 		
 		int blockX = doubleToInt(x);
 		int blockY = doubleToInt(y);
@@ -76,15 +81,21 @@ public class NoiseImage {
 		// Calculate ascension.
 		double ascension = f.derivedValue(x, y);
 		
-		if (ascension > 1 || ascension < -1) {
-			System.out.println("Ascension: " + ascension);
+		if (ascension > 1) {
+			if (!ascensionOverflow) {
+				System.out.println("Ascension: " + ascension);
+				ascensionOverflow = true;
+			}
+			
+			ascension = 1;
 		}
 		
 		// Convert ascension to light level.
-		double shade = Math.sin(Math.PI / 4 - Math.atan(ascension));
+		double shade = Math.sin(Math.PI / 4 + Math.atan(ascension));
 		
-		if (shade > 1 || shade < 0) {
+		if ((shade > 1 || shade < 0) && !shadeOverflow) {
 			System.out.println("Shade: " + shade);
+			shadeOverflow = true;
 		}
 		
 		// Add ambient light. Shade is between 0 and 1 here.
