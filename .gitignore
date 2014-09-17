@@ -2,3 +2,4 @@
 *.class
 *.png
 *.jpg
+/target
