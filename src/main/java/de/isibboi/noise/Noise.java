@@ -6,19 +6,33 @@ import de.isibboi.noise.function.Function;
 
 public class Noise {
 	public static void main(String[] args) throws Exception {
-		Option scale = OptionBuilder.hasArg().create('s');
-		Option noiseScale = OptionBuilder.hasArg().create('n');
-		Option noiseFunctionName = OptionBuilder.hasArg().create('f');
+		Option scale = OptionBuilder.hasArg().withDescription("The size of the image.").create('s');
+		Option noiseScale = OptionBuilder.hasArg().withDescription("The size of the pattern.").create('n');
+		Option noiseFunctionName = OptionBuilder.hasArg().withDescription("Available functions can be retrieved with -l.").create('f');
+		Option help = OptionBuilder.withLongOpt("help").withDescription("Prints this message.").create('h');
+		Option list = OptionBuilder.hasArg().withDescription("Lists most available functions. There might be more functions on the classpath in non-default locations, those won't be listed.").create('l');
 		
 		Options options = new Options();
 		options.addOption(scale);
 		options.addOption(noiseScale);
 		options.addOption(noiseFunctionName);
+		options.addOption(help);
+		options.addOption(list);
 		
 		CommandLineParser parser = new GnuParser();
 		
 		try {
 			CommandLine commandLine = parser.parse(options, args);
+			
+			if (hasOption(help, commandLine)) {
+				new HelpFormatter().printHelp("Noise", options);
+				return;
+			}
+			
+			if (hasOption(list, commandLine)) {
+				listFunctions();
+				return;
+			}
 			
 			Function noiseFunction = (Function) Class.forName("de.isibboi.noise.function."
 															  + getString(noiseFunctionName, commandLine, "Sinus")
@@ -83,5 +97,9 @@ public class Noise {
 		} else {
 			return defaultValue;
 		}
+	}
+	
+	public static void listFunctions() {
+		System.out.println("To be implemented");
 	}
 }
