@@ -17,13 +17,13 @@ public class NoiseImage {
 	private static final int IMAGE_HEIGHT = 400;
 	private static final int NOISE_WIDTH = 20;
 	private static final int NOISE_HEIGHT = 20;
-	private static final double PROJECTION_DISPLACEMENT = 0.5;
 	private static final double AMBIENT_LIGHT = 0.1;
 	
 	private final SecureRandom sr;
 	private final long seed;
-	private final MessageDigest md5;
 	private final Function f;
+	private final Camera c;
+	private final ColorMap colorMap;
 	
 	private boolean ascensionOverflow = false;
 	private boolean shadeOverflow = false;
@@ -40,18 +40,35 @@ public class NoiseImage {
 		
 		sr = new SecureRandom();
 		seed = sr.nextLong();
-		md5 = MessageDigest.getInstance("MD5");
-		this. f = f;
+		this.f = f;
 		
+//		c = new ParallelCamera(new Vector(20, 20, 20),
+//				new Vector(-1, -1, -1),
+//				new Vector(-0.5, 1, -0.5));
+		c = new ParallelCamera(new Vector(20, 20, Math.sqrt(2) * 20),
+				new Vector(-1, -1, -Math.sqrt(2)),
+				new Vector(-0.5, 2.5, -Math.sqrt(2)));
 		
+		colorMap = new ColorMap(seed);
 		
-		int realNoiseWidth = NOISE_WIDTH * noiseScale;
-		int realNoiseHeight = NOISE_HEIGHT * noiseScale;
+		final int realNoiseWidth = NOISE_WIDTH * noiseScale;
+		final int realNoiseHeight = NOISE_HEIGHT * noiseScale;
 		
+		int oldPercent = 0;
+		int count = 0;
+		final int pixelAmount = noiseImage.getWidth() * noiseImage.getHeight();
 		for (int x = 0; x < noiseImage.getWidth(); x++) {
 			for (int y = 0; y < noiseImage.getHeight(); y++) {
 				noiseImage.setRGB(x, y, noiseFunction((double) x / noiseImage.getWidth() * realNoiseWidth - (realNoiseWidth / 2),
 								  (double) y / noiseImage.getHeight() * realNoiseHeight - (realNoiseHeight / 2)));
+				
+				count++;
+				int newPercent = 100 * count / pixelAmount;
+				
+				if (oldPercent != newPercent) {
+					System.out.println(newPercent + "%");
+					oldPercent = newPercent;
+				}
 			}
 		}
 		
@@ -66,20 +83,23 @@ public class NoiseImage {
 		System.out.println("Image shown. Finished.");
 	}
 	
-	public int noiseFunction(double x, double y) throws Exception {
-		double value = f.value(x, y);
+	public int noiseFunction(final double x, final double y) throws Exception {
+		Vector hit = c.renderPoint(x, y, f);
 		
-		// Translate position to get an angled parallel projection effect.
-		x += value * PROJECTION_DISPLACEMENT;
-		y += value * PROJECTION_DISPLACEMENT;
+		if (hit == null) {
+			return 0;
+		}
 		
-		int blockX = doubleToInt(x);
-		int blockY = doubleToInt(y);
+//		System.out.println("(x, y): (" + x + ", " + y + "), hit: ("
+//				+ hit.getX() + ", " + hit.getY() + ")");
+		
+		int blockX = doubleToInt(hit.getX());
+		int blockY = doubleToInt(hit.getY());
 	
-		Color c = new Color(getRandomNumber(seed, blockX, blockY));
+		Color c = new Color(colorMap.getColor(blockX, blockY));
 		
 		// Calculate ascension.
-		double ascension = f.derivedValue(x, y);
+		double ascension = f.derivedValue(hit.getX(), hit.getY());
 		
 		if (ascension > 1) {
 			if (!ascensionOverflow) {
@@ -104,21 +124,9 @@ public class NoiseImage {
 		
 		c = new Color((int) (c.getRed() * shade), (int) (c.getGreen() * shade), (int) (c.getBlue() * shade));
 		
+//		System.exit(0);
+		
 		return c.getRGB();
-	}
-	
-	private int getRandomNumber(long... parameters) throws Exception {
-		md5.reset();
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		DataOutputStream data = new DataOutputStream(bytes);
-		
-		for (long l: parameters) {
-			data.writeLong(l);
-		}
-		
-		byte[] digest = md5.digest(bytes.toByteArray());
-		
-		return digest[0] + (digest[1] << 8) + (digest[2] << 16) + (digest[2] << 24);
 	}
 	
 	private int doubleToInt(double d) {
