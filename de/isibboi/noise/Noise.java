@@ -14,6 +14,9 @@ public class Noise {
 	private static final int SCALE = 1;
 	private static final int IMAGE_WIDTH = 400 * SCALE;
 	private static final int IMAGE_HEIGHT = 400 * SCALE;
+	private static final int NOISE_WIDTH = 20;
+	private static final int NOISE_HEIGHT = 20;
+	private static final double AMBIENT_LIGHT = 0.1;
 
 	public static void main(String[] args) throws Exception {
 		Noise n = new Noise();
@@ -39,7 +42,8 @@ public class Noise {
 		
 		for (int x = 0; x < noiseImage.getWidth(); x++) {
 			for (int y = 0; y < noiseImage.getHeight(); y++) {
-				noiseImage.setRGB(x, y, noiseFunction(x, y));
+				noiseImage.setRGB(x, y, noiseFunction((double) x / noiseImage.getWidth() * NOISE_WIDTH,
+								  (double) y / noiseImage.getHeight() * NOISE_HEIGHT));
 			}
 		}
 		
@@ -55,27 +59,46 @@ public class Noise {
 	}
 	
 	public int noiseFunction(double x, double y) throws Exception {
-		double dx = x - IMAGE_WIDTH / 2;
-		double dy = y - IMAGE_HEIGHT / 2;
-		double distance = Math.sqrt(dx * dx + dy * dy);
+		x -= NOISE_WIDTH / 2;
+		y -= NOISE_HEIGHT / 2;
+		double distance = Math.sqrt(x * x + y * y);
 		
-		final double trigonometricParameter = distance / 10 / SCALE;
-		x -= Math.sin(trigonometricParameter) * 2.5 * SCALE;
-		y -= Math.sin(trigonometricParameter) * 2.5 * SCALE;
+		// Translate position to get an angled parallel projection effect.
+		x -= Math.sin(distance) * 0.5;
+		y -= Math.sin(distance) * 0.5;
 		
-		int blockX = (int) (x / 10 / SCALE);
-		int blockY = (int) (y / 10 / SCALE);
+		int blockX = (int) (x);
+		int blockY = (int) (y);
 	
 		Color c = new Color(getRandomNumber(seed, blockX, blockY));
 		
-		double shade = Math.cos(trigonometricParameter);
-		shade = -Math.min(0, shade);
-		shade *= 0.35;
-		shade += 0.65;
+		// Calculate ascension.
+		double shade = directionalDeriverative(x, y);
+		
+		if (shade > 1 || shade < -1) {
+			System.out.println("Ascension: " + shade);
+		}
+		
+		// Convert ascension to light level.
+		shade = Math.sin(Math.PI / 4 - Math.atan(shade));
+		
+		if (shade > 1 || shade < 0) {
+			System.out.println("Shade: " + shade);
+		}
+		
+		// Add ambient light. Shade is between 0 and 1 here.
+		shade *= 1 - AMBIENT_LIGHT;
+		shade += AMBIENT_LIGHT;
 		
 		c = new Color((int) (c.getRed() * shade), (int) (c.getGreen() * shade), (int) (c.getBlue() * shade));
 		
 		return c.getRGB();
+	}
+	
+	public double directionalDeriverative(double x, double y) {
+		double absoluteValue = Math.sqrt(x * x + y * y);
+	
+		return Math.cos(absoluteValue) * (x + y) / absoluteValue / Math.sqrt(2);
 	}
 	
 	public int getRandomNumber(long... parameters) throws Exception {
