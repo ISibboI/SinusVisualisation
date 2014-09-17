@@ -1,4 +1,4 @@
-package de.isibboi.noise;
+package de.isibboi.noise.function;
 
 public abstract class Function {
 	private static final double DERIVERATION_DISTANCE = 1e-5;

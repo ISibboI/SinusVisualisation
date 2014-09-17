@@ -1,4 +1,4 @@
-package de.isibboi.noise;
+package de.isibboi.noise.function;
 
 import java.math.*;
 import java.util.*;

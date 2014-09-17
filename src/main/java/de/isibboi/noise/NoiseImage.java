@@ -10,6 +10,8 @@ import java.util.*;
 import javax.imageio.*;
 import javax.swing.*;
 
+import de.isibboi.noise.function.Function;
+
 public class NoiseImage {
 	private static final int IMAGE_WIDTH = 400;
 	private static final int IMAGE_HEIGHT = 400;
