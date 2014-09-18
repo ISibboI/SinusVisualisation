@@ -126,20 +126,9 @@ public class NoiseImage {
 		
 		blue /= 6;
 		
-		// Calculate ascension.
-		double ascension = f.derivedValue(hit.getX(), hit.getY());
-		
-		if (ascension > 1) {
-			if (!ascensionOverflow) {
-				System.out.println("Ascension: " + ascension);
-				ascensionOverflow = true;
-			}
-			
-			ascension = 1;
-		}
-		
-		// Convert ascension to light level.
-		double shade = Math.sin(Math.PI / 4 + Math.atan(ascension));
+		// Calculate light level
+		double shade = Math.max(new Vector(-1, -1, 1).getNormalized()
+				.dot(f.normal(hit.getX(), hit.getY())), 0);
 		
 		if ((shade > 1 || shade < 0) && !shadeOverflow) {
 			System.out.println("Shade: " + shade);
