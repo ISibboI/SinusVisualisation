@@ -1,6 +1,5 @@
 package de.isibboi.noise.function;
 
-import java.math.*;
 
 public class AbsoluteSinusFunction extends Function {
 	@Override

@@ -1,14 +1,14 @@
 package de.isibboi.noise;
 
-import java.awt.*;
-import java.awt.image.*;
-import java.io.*;
-import java.math.*;
-import java.nio.*;
-import java.security.*;
-import java.util.*;
-import javax.imageio.*;
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.security.SecureRandom;
+
+import javax.imageio.ImageIO;
+import javax.swing.JFrame;
 
 import de.isibboi.noise.function.Function;
 
@@ -24,12 +24,12 @@ public class NoiseImage {
 	private final Function f;
 	private final Camera c;
 	private final ColorMap colorMap;
+	private final BufferedImage noiseImage;
 	
-	private boolean ascensionOverflow = false;
 	private boolean shadeOverflow = false;
 	
 	public NoiseImage(Function f, int scale, int noiseScale) throws Exception {
-		BufferedImage noiseImage = new BufferedImage(IMAGE_WIDTH * scale, IMAGE_HEIGHT * scale, BufferedImage.TYPE_INT_RGB);
+		noiseImage = new BufferedImage(IMAGE_WIDTH * scale, IMAGE_HEIGHT * scale, BufferedImage.TYPE_INT_RGB);
 		
 		JFrame noiseFrame = new JFrame("Noise");
 		noiseFrame.getContentPane().setPreferredSize(new Dimension(noiseImage.getWidth(), noiseImage.getHeight()));
@@ -78,18 +78,20 @@ public class NoiseImage {
 			}
 		}
 		
-		try {
-			ImageIO.write(noiseImage, "png", new File("noise.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
 		noiseFrame.getContentPane().getGraphics().drawImage(noiseImage, 0, 0, null);
 		
 		System.out.println("Image shown. Finished.");
 	}
 	
-	public int noiseFunction(final double x, final double y) throws Exception {
+	public void save() {
+		try {
+			ImageIO.write(noiseImage, "png", new File("noise.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private int noiseFunction(final double x, final double y) throws Exception {
 		Vector hit = c.renderPoint(x, y, f);
 		
 		if (hit == null) {

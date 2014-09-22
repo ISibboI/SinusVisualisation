@@ -1,10 +1,18 @@
 package de.isibboi.noise;
 
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 import de.isibboi.noise.function.Function;
 
 public class Noise {
+	@SuppressWarnings("static-access")
 	public static void main(String[] args) throws Exception {
 		Option scale = OptionBuilder.hasArg().withDescription("The size of the image.").create('s');
 		Option noiseScale = OptionBuilder.hasArg().withDescription("The size of the pattern.").create('n');
@@ -41,6 +49,7 @@ public class Noise {
 			NoiseImage n = new NoiseImage(noiseFunction,
 										  getInt(scale, commandLine, 1, 100, 1),
 										  getInt(noiseScale, commandLine, 1, 1000, 1));
+			n.save();
 		} catch (ParseException e) {
 			System.out.println("Error: " + e.getMessage());
 		}

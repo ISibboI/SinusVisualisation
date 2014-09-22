@@ -1,6 +1,5 @@
 package de.isibboi.noise.function;
 
-import java.math.*;
 
 public class InversedInputSinusFunction extends Function {
 	public double value(double x, double y) {

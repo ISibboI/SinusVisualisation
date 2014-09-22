@@ -1,7 +1,5 @@
 package de.isibboi.noise.function;
 
-import java.math.*;
-import java.util.*;
 
 public class SinusFunction extends Function {
 	public double value(double x, double y) {

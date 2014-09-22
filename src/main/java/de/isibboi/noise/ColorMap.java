@@ -1,8 +1,12 @@
 package de.isibboi.noise;
 
-import java.util.*;
-import java.security.*;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ColorMap {
 	private final Map<Point, Integer> map = new HashMap<>();

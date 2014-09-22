@@ -1,6 +1,5 @@
 package de.isibboi.noise;
 
-import java.math.*;
 
 public class Vector {
 	private final double x;
