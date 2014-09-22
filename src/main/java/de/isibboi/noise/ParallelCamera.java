@@ -3,9 +3,9 @@ package de.isibboi.noise;
 import de.isibboi.noise.function.Function;
 
 public class ParallelCamera implements Camera {
-	private static final double START_STEP = 5;
-	private static final double STEP_FACTOR = 2;
-	private static final int MAX_EXPONENTIAL_STEPS = 100;
+	private static final double START_STEP = 2;
+	private static final double STEP_INCREMENT = 2;
+	private static final int MAX_STEPS = 100;
 	private static final double MIN_SEARCH_INTERVAL = 0.001;
 	
 	protected final Vector position;
@@ -67,14 +67,14 @@ public class ParallelCamera implements Camera {
 			lastY = currentY;
 			lastZ = currentZ;
 			
-			currentStep *= STEP_FACTOR;
+			currentStep += STEP_INCREMENT;
 			stepsTaken++;
 			
 			currentX += orientationX * currentStep;
 			currentY += orientationY * currentStep;
 			currentZ += orientationZ * currentStep;
 		} while (isAboveFunction(currentX, currentY, currentZ, f) == startAboveFunction
-				&& stepsTaken <= MAX_EXPONENTIAL_STEPS);
+				&& stepsTaken <= MAX_STEPS);
 		
 		if (isAboveFunction(currentX, currentY, currentZ, f) == startAboveFunction) {
 			return null;
